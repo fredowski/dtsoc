@@ -33,5 +33,20 @@ compile: output_files/de1_soc_top.merge.summary
 	quartus_stp de1_soc_top
 	quartus_sh --flow compile de1_soc_top.qpf
 
+# U-Boot bootloader
+.PHONY: uboot
+uboot:
+	python3 ./sw/u-boot/u-boot-socfpga/arch/arm/mach-socfpga/cv_bsp_generator/cv_bsp_generator.py \
+	  -i ./hps_isw_handoff/de1_soc_hps_0 \
+	  -o ./sw/u-boot/u-boot-socfpga/board/altera/cyclone5-socdk/qts
+	cd ./sw/u-boot/u-boot-socfpga; \
+	  make socfpga_cyclone5_defconfig; \
+	  make -j2
+
+# Create the SDCARD
+.PHONY: sdcard
+sdcard: ./sw/u-boot/u-boot-socfpga/u-boot-with-spl.sfp
+	./sw/u-boot/build_sdcard.sh
+
 clean:
 	rm -rf *.qpf output_files

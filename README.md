@@ -49,4 +49,15 @@ https://github.com/altera-opensource/u-boot-socfpga/blob/socfpga_v2023.10/doc/RE
 
 https://github.com/altera-opensource/u-boot-socfpga/tree/socfpga_v2023.10/arch/arm/mach-socfpga
 
+You need to install the following packages for U-BOOT
+
+```
+sudo apt install gcc-arm-none-eabi bison flex libssl-dev bc
+```
+
+u-boot is a submodule of this repository. To fully install it run
+
+```
+git submodule init
+```
 
