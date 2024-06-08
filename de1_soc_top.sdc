@@ -9,7 +9,7 @@
 #
 #****************************************************************************
 # 50MHz board input clock
-create_clock -period 20 [get_ports fpga_clk_50]
+create_clock -period 20 [get_ports CLOCK_50]
 
 # for enhancing USB BlasterII to be reliable, 25MHz
 create_clock -name {altera_reserved_tck} -period 40 {altera_reserved_tck}
