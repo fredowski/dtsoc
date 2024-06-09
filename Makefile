@@ -67,7 +67,7 @@ sw/linux/linux-source-6.1/arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb: sw/linux
 rootfs: sw/linux/rootfs.tar.gz
 
 sw/linux/rootfs.tar.gz: sw/linux/build_rootfs.sh
-	sw/linux/build_rootfs.sh
+	cd sw/linux; ./build_rootfs.sh
 
 # Create the SDCARD
 sdcarddeps=sw/linux/linux-source-6.1/arch/arm/boot/zImage \
@@ -77,7 +77,7 @@ sdcarddeps=sw/linux/linux-source-6.1/arch/arm/boot/zImage \
 
 .PHONY: sdcard
 sdcard: $(sdcarddeps)
-	sw/build_sdcard.sh
+	cd sw; ./build_sdcard.sh
 
 clean:
 	rm -rf *.qpf output_files sw/linux/linux-source-*
