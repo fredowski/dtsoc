@@ -71,7 +71,7 @@ sw/linux/rootfs.tar.gz: sw/linux/build_rootfs.sh
 
 # Create the SDCARD
 sdcarddeps=sw/linux/linux-source-6.1/arch/arm/boot/zImage \
-  sw/linux/linux-source-6.1/arch/arm/boot/dts/socfpga_cyclone5_socdk.dt \
+  sw/linux/linux-source-6.1/arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb \
   sw/linux/rootfs.tar.gz \
   sw/u-boot/u-boot-socfpga/u-boot-with-spl.sfp
 
