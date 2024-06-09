@@ -52,7 +52,7 @@ https://github.com/altera-opensource/u-boot-socfpga/tree/socfpga_v2023.10/arch/a
 You need to install the following packages for U-BOOT
 
 ```
-sudo apt install gcc-arm-none-eabi bison flex libssl-dev bc
+sudo apt install gcc-arm-linux-gnueabihf bison flex libssl-dev bc
 ```
 
 u-boot is a submodule of this repository. To fully install it run
@@ -60,4 +60,58 @@ u-boot is a submodule of this repository. To fully install it run
 ```
 git submodule init
 ```
+
+```
+make u-boot
+```
+
+will build the u-boot bootloader for the Intel Cyclone board but it works also for the
+Terasic DE1-SoC.
+
+## Linux Kernel
+
+
+Install the kernel sources on the build machine. For debian 12.5 this 6.1. An
+alternative is the repo https://github.com/altera-opensource/linux-socfpga
+
+```
+sudo apt install linux-source-6.1
+```
+
+```
+make kernel
+```
+
+will build
+  * linux kernel 6.1.90 which belongs to debian 12.5 for armhf
+  * linux device tree
+
+## Linux Rootfilesystem
+
+We use the debian bookworm rootfs. To build the rootfs we need the
+following tools
+
+```
+sudo apt install debootstrap qemu-user-static
+```
+
+```
+make rootfs
+```
+
+builds the Debian bookworm root filesystem
+
+## SDCARD
+
+Attach a Micro SDCARD to your host computer. The SDCARD will contain the
+  * u-boot boot loader
+  * linux kernel
+  * linux root file system
+Use
+
+```
+make sdcard
+```
+
+to format and configure the sdcard.
 

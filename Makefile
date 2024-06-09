@@ -45,10 +45,41 @@ u-boot: ./sw/u-boot/u-boot-socfpga/u-boot-with-spl.sfp
 	  make socfpga_cyclone5_defconfig; \
 	  make -j2
 
+# Linux kernel
+.PHONY: kernel
+kernel: sw/linux/linux-source-6.1/arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb
+
+# Assume that package linux-source-6.1 is installed
+sw/linux/linux-source-6.1:
+	cd sw/linux; tar -xf /usr/src/linux-source-6.1.tar.xz
+
+sw/linux/linux-source-6.1/arch/arm/boot/zImage: sw/linux/linux-source-6.1
+	cd sw/linux/linux-source-6.1; \
+	  make socfpga_defconfig; \
+	  make zImage;
+
+sw/linux/linux-source-6.1/arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb: sw/linux/linux-source-6.1/arch/arm/boot/zImage
+	cd sw/linux/linux-source-6.1; \
+	  make socfpga_cyclone5_socdk.dtb
+
+# Rootfilesystem
+.PHONY: rootfs
+rootfs: sw/linux/rootfs.tar.gz
+
+sw/linux/rootfs.tar.gz: sw/linux/build_rootfs.sh
+	sw/linux/build_rootfs.sh
+
 # Create the SDCARD
+sdcarddeps=sw/linux/linux-source-6.1/arch/arm/boot/zImage \
+  sw/linux/linux-source-6.1/arch/arm/boot/dts/socfpga_cyclone5_socdk.dt \
+  sw/linux/rootfs.tar.gz \
+  sw/u-boot/u-boot-socfpga/u-boot-with-spl.sfp
+
 .PHONY: sdcard
-sdcard: ./sw/u-boot/u-boot-socfpga/u-boot-with-spl.sfp
+sdcard: $(sdcarddeps)
 	./sw/u-boot/build_sdcard.sh
 
 clean:
-	rm -rf *.qpf output_files
+	rm -rf *.qpf output_files sw/linux/linux-source-*
+	sudo rm -rf sw/linux/rootfs sw/linux/rootfs.tar.gz
+
