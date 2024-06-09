@@ -77,7 +77,7 @@ sdcarddeps=sw/linux/linux-source-6.1/arch/arm/boot/zImage \
 
 .PHONY: sdcard
 sdcard: $(sdcarddeps)
-	./sw/u-boot/build_sdcard.sh
+	sw/build_sdcard.sh
 
 clean:
 	rm -rf *.qpf output_files sw/linux/linux-source-*
