@@ -33,6 +33,13 @@ compile: output_files/de1_soc_top.merge.summary
 	quartus_stp de1_soc_top
 	quartus_sh --flow compile de1_soc_top.qpf
 
+# Create the FPGA Raw Binary File .rbf from SRAM Object File .sof format
+.PHONY: rbf
+rbf: output_files/de1_soc_top.rbf
+
+output_files/de1_soc_top.rbf: output_files/de1_soc_top.sof
+	quartus_cpf -c output_files/de1_soc_top.sof output_files/de1_soc_top.rbf
+
 # U-Boot bootloader
 .PHONY: u-boot
 u-boot: ./sw/u-boot/u-boot-socfpga/u-boot-with-spl.sfp
@@ -44,6 +51,14 @@ u-boot: ./sw/u-boot/u-boot-socfpga/u-boot-with-spl.sfp
 	cd ./sw/u-boot/u-boot-socfpga; \
 	  make socfpga_cyclone5_defconfig; \
 	  make -j2
+
+# u-boot boot script which will load the FPGA
+sw/u-boot/u-boot.scr: sw/u-boot/boot.script
+	sw/u-boot/u-boot-socfpga/tools/mkimage -A arm -O linux \
+	  -T script -C none -a 0 -e 0 -n doof \
+	  -d sw/u-boot/boot.script \
+	  sw/u-boot/u-boot.scr
+
 
 # Linux kernel
 .PHONY: kernel
@@ -73,7 +88,9 @@ sw/linux/rootfs.tar.gz: sw/linux/build_rootfs.sh
 sdcarddeps=sw/linux/linux-source-6.1/arch/arm/boot/zImage \
   sw/linux/linux-source-6.1/arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb \
   sw/linux/rootfs.tar.gz \
-  sw/u-boot/u-boot-socfpga/u-boot-with-spl.sfp
+  sw/u-boot/u-boot-socfpga/u-boot-with-spl.sfp \
+  output_files/de1_soc_top.rbf \
+  sw/u-boot/u-boot.scr
 
 .PHONY: sdcard
 sdcard: $(sdcarddeps)
@@ -82,4 +99,5 @@ sdcard: $(sdcarddeps)
 clean:
 	rm -rf *.qpf output_files sw/linux/linux-source-*
 	sudo rm -rf sw/linux/rootfs sw/linux/rootfs.tar.gz
+	rm -f sw/u-boot/u-boot.scr
 

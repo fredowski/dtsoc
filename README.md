@@ -39,6 +39,27 @@ I adapt that setup to fit to the Terasic Board. Sahand Kashani-Akhavan and René
 
  https://github.com/sahandKashani/Altera-FPGA-top-level-files
 
+## Programming the FPGA
+The FPGA part can be programmed via different methods
+  * USBBlaster cable - independently from the HPS core (default)
+  * u-boot bootloader programs during boot via the HPS/FPGA Manager
+  * linux programs via HPS/FPGA Manager
+
+Programming via USBBlaster is the default setup. You do this via quartus programmer as if no HPS core ist there. The HPS core boots and runs independently on the Terasic DE1-SoC board.
+
+Programming via u-boot or linux needs an fpga .rbf file stored on the sdcard. The fpga will then be configured during the boot process of the HPS core.
+
+The fpga programming depends on switch settings on of the MSEL switches on the backside of the Terasic DE1-SoC board. See:
+
+https://www.rocketboards.org/foswiki/Documentation/GSRD131ProgrammingFPGA
+
+for some hints about the different methods for configuring the fpga via HPS. That description is a little bit outdated as the "Preloader" does not exist anymore.
+
+The working and tested procedure is
+
+  * FPGA configration during u-boot via u-boot.scr on the SDCARD
+  * MSEL[4..0] = "00000" - the "10101" did not work
+
 ## Software / U-Boot
 
 The HPS system boots from the SDCARD which is on the board. The quartus system builder toolchain produces some C files which are used during early boot by the U-Boot boot loader:
@@ -115,10 +136,13 @@ make sdcard
 
 to format and configure the sdcard.
 
+
+
+
 ## Test the system
 
 ### MSEL switches
-Switch the MSEL switches on the backside of the board to MSEL[0..4]="01010".
+Switch the MSEL switches on the backside of the board to MSEL[4..0]="00000".
 
 ### Wiring
 Add the

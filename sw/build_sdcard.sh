@@ -61,6 +61,10 @@ sudo tar -C sdcard/ext3 -xzf ./linux/rootfs.tar.gz
 # Copy the kernel and the linux kernal device tree blob
 sudo cp ./linux/linux-source-6.1/arch/arm/boot/zImage ./sdcard/fat32
 sudo cp ./linux/linux-source-6.1/arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb ./sdcard/fat32
+# Copy the fpga programming file
+sudo cp ../output_files/de1_soc_top.rbf sdcard/fat32
+# Copy the u-boot boot script which will program the FPGA during u-boot bootloading
+sudo cp u-boot/u-boot.scr sdcard/fat32
 pushd sdcard/fat32
 sudo mkdir extlinux
 sudo /bin/bash -c "echo 'LABEL Linux Default' > extlinux/extlinux.conf"

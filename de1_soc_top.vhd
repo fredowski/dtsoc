@@ -410,6 +410,7 @@ begin
       reset_reset_n => hps_reset_n
   );
 
+  LEDR <= SW;
 
 
 end;
