@@ -2,7 +2,7 @@
 # for Altera DE1 SOC Board
 
 
-# Build the qsys file from a tcl description
+# Build the qsys file from a tcl file
 # which was saved from the qsys gui
 de1_soc.qsys: de1_soc_qsys.tcl
 	qsys-script --script=de1_soc_qsys.tcl
@@ -96,8 +96,21 @@ sdcarddeps=sw/linux/linux-source-6.1/arch/arm/boot/zImage \
 sdcard: $(sdcarddeps)
 	cd sw; ./build_sdcard.sh
 
-clean:
-	rm -rf *.qpf output_files sw/linux/linux-source-*
+cleanhw:
+	rm -rf output_files db de1_soc
+	rm -rf c5_pin_model_dump.txt de1_soc hps_isw_handoff hps_sdram_*
+	rm -rf incremental_db
+	rm -rf *.qpf *.qsf *.qws *.sopcinfo *.qsys
+
+cleansw:
+	rm -rf sw/linux/linux-source-*
 	sudo rm -rf sw/linux/rootfs sw/linux/rootfs.tar.gz
 	rm -f sw/u-boot/u-boot.scr
+	rm -rf sw/sdcard
+	cd sw/u-boot/u-boot-socfpga; make clean
+
+clean:
+	make cleanhw
+	make cleansw
+
 
