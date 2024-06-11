@@ -130,14 +130,22 @@ Attach a Micro SDCARD to your host computer. The SDCARD will contain the
   * linux root file system
 Use
 
+### Format the SDCARD
+
+Insert the SDCARD, check on which device the SDCARD is available and run
+```
+cd sw
+./format_sdcard.sh /dev/sdX
+```
+Inside Virtual CAE machine, the SDCARD is on /dev/sdb
+
+### Write the SDCARD content
+
 ```
 make sdcard
 ```
 
-to format and configure the sdcard.
-
-
-
+to write the content to the sdcard. You need to format the sdcard before you can write to the sdcard as a special partition setup is required.
 
 ## Test the system
 

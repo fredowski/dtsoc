@@ -2,60 +2,40 @@
 
 set -e
 
-# Assume that the SDCARD is on /dev/sdb
-# Unmount possibly mounted partitions
-sudo umount /dev/sdb1 || true
-sudo umount /dev/sdb2 || true
+# Unmount possibly mounted partitions (mounted by automounter)
+if [ -f /dev/disk/by-label/de1socext3 ]; then
+    sudo umount /dev/disk/by-label/de1socext3
+fi
+if [ -f /dev/disk/by-label/DE1SOCF32 ]; then
+    sudo umount /dev/disk/by-label/DE1SOCF32
+fi
 
-# Clean SDCARD
-sudo dd if=/dev/zero of=/dev/sdb bs=512 count=1
+# Assume that the SDCARD was formatted with the correct labels
+# and mount via the labels
 
-# Partition the SDCARD
-# This result of the partioning should be
-#Device     Boot Start     End Sectors  Size Id Type
-#/dev/sdb1        4096   69631   65536   32M  b W95 FAT32
-#/dev/sdb2       69632 1118207 1048576  512M 83 Linux
-#/dev/sdb3        2048    4095    2048    1M a2 unknown
-sudo fdisk /dev/sdb <<EOF
-n
-p
-3
-2048
-4095
-t
-a2
-n
-p
-1
-4096
-+32M
-t
-1
-b
-n
-p
-2
-69632
-+512M
-t
-2
-83
-p
-w
-EOF
-
-# Format the windows and the linux partition
-sudo mkfs.vfat /dev/sdb1
-sudo mkfs.ext3 -F /dev/sdb2
-
-# Copy the u-boot loader to partition 3
-sudo dd if=./u-boot/u-boot-socfpga/u-boot-with-spl.sfp of=/dev/sdb3 bs=64k seek=0
 
 # Mount fat and ext3 filesystems
 mkdir -p sdcard/fat32
 mkdir -p sdcard/ext3
-sudo mount /dev/sdb1 sdcard/fat32
-sudo mount /dev/sdb2 sdcard/ext3
+
+if ! mount -l | grep sdcard/fat32; then
+    echo "Mounting dos partition"
+    sudo mount -L DE1SOCF32 sdcard/fat32
+fi
+
+if ! mount -l | grep sdcard/ext3; then
+    echo "Mounting ext3 partition"
+    sudo mount -L de1socext3 sdcard/ext3
+fi
+
+# Figure out if we are on /dev/sdb or /dev/sdc or ...
+devname=`mount -l | grep de1socext3 | cut -c 1-8`
+# We are on partition 3 - This should be /dev/sdb3
+devname=${devname}3
+
+# Copy the u-boot loader to partition 3
+sudo dd if=./u-boot/u-boot-socfpga/u-boot-with-spl.sfp of=${devname} bs=64k seek=0
+
 # Copy the root filesystem
 sudo tar -C sdcard/ext3 -xzf ./linux/rootfs.tar.gz
 # Copy the kernel and the linux kernal device tree blob
