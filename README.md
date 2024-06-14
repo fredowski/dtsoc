@@ -18,6 +18,27 @@ Terasic produces the [Terasic DE1-SoC Board](http://de1-soc.terasic.com.tw) whic
 
 Intel/Altera sells a different [Intel Cyclone V SoC Development Board](https://www.intel.com/content/www/us/en/products/details/fpga/development-kits/cyclone/v-sx.html). 
 
+## Build environment
+
+This system builds on Debian Bookworm 12.5. The rootfs and the kernel for the SoC are also taken from Debian 12.5. The rootfs build uses "debootstrap" which may also be debian specific. The build environment uses
+
+  * Debian 12.5 bookworm as build platform incl. cross compiler
+  * Debian 12.5 kernel 6.1.90 for the SoC
+  * Debian 12.5 rootfs for the SoC
+  * Intel Altera Quartus 23.1 synthesis software
+  * [U-Boot bootloader from Intel/Altera](https://github.com/altera-opensource/u-boot-socfpga) on branch socfpga_v2023.10
+
+### TL;DR
+
+  * Create a [build environment with Quartus 23.1](https://www.hs-augsburg.de/homes/beckmanf/dokuwiki/doku.php?id=ubuntu_virtual_cae_system)
+  * Install packages mentioned further down
+  * run "make compile" to compile the hardware
+  * Insert an SDCARD with USB card reader and make the card available in the virtual machine 
+  * cd sw; ./format_sdcard.sh /dev/sdb
+  * run "make sdcard" to build u-boot, linux kernel, rootfs and copy to the sdcard
+  * Insert the SDCARD in the DE1-SoC board and connect a usb cable for the terminal
+  * open gtkterm, switch on the board and watch it booting
+
 ## Hardware / System Builder Toolchain
 
 Intel/Rocketchip maintains a system builder toolchain example for a Golden Reference Design for the Intel Cyclone V SoC Development Board.
@@ -33,11 +54,42 @@ to build a small HPS/FPGA system. The input of that flow is system builder tcl d
 
   * HPS Pin Multiplexing, i.e. which HPS Peripheral is muxed to which HPS pin
   * Used internal HPS/FPGA interfaces
-  * DDR3 RAM timing setupWe follow that path.
+  * DDR3 RAM timing setup
 
 I adapt that setup to fit to the Terasic Board. Sahand Kashani-Akhavan and René Beuchat from EPFL have written an [SoC FPAG Design Guide](https://people.ece.cornell.edu/land/courses/ece5760/DE1_SOC/SoC-FPGA%20Design%20Guide_EPFL.pdf) with a setup for the DE1-SoC Terasic board. They also made a repository:
 
  https://github.com/sahandKashani/Altera-FPGA-top-level-files
+
+In this repository the system build tcl file is
+
+  * [de1_soc_qsys.tcl](de1_soc_qsys.tcl)
+
+The VHDL files are
+
+  * [de1_soc_top.vhd](de1_soc_top.vhd)
+  * [axireg.vhd](axireg.vhd)
+
+The [Makefile](Makefile) builds the hardware and software components.
+
+### Building the Hardware Components
+
+With
+```
+make qip
+```
+The de1_soc.qsys file is build and the Quartus ip component containing the HPS in the directory de1_soc is generated. With
+```
+make qpf
+```
+the quartus project file is generated and with
+```
+make compile
+```
+the hardware is synthesized. This will produce the Quartus SRAM object file .sof which can be used to program the fpga via USBBlaster. With
+```
+make rbf
+```
+the Quartus raw binary file .rbf is generated which is needed for configuring the fpga during the HPS boot process.
 
 ## Programming the FPGA
 The FPGA part can be programmed via different methods
@@ -60,7 +112,7 @@ The working and tested procedure is
   * FPGA configration during u-boot via u-boot.scr on the SDCARD
   * MSEL[4..0] = "00000" - the "10101" did not work
 
-## Software / U-Boot
+## Software / U-Boot / Boot process
 
 The HPS system boots from the SDCARD which is on the board. The quartus system builder toolchain produces some C files which are used during early boot by the U-Boot boot loader:
 
@@ -89,8 +141,19 @@ make u-boot
 will build the u-boot bootloader for the Intel Cyclone board but it works also for the
 Terasic DE1-SoC.
 
-## Linux Kernel
+### Boot procedure
 
+The Terasic DE1-SoC boots via the following steps
+
+  * The bootrom code on the HPS searches for an SDCARD
+  * The bootrom code will look for a partition on the SDCARD with type "A2"
+  * The content of that partition is loaded and executed
+  * Partion "A2" contains the u-boot bootloader
+  * The U-Boot bootloader looks for a script u-boot.scr on the dos partition and executes that script. This script will configure the fpga via the de1_soc_top.rbf file and enable the hps2fpga bridge. The .rbf file is on the dos partition of the SDCARD.
+  * The U-Boot bootloader looks for extlinux/extlinux.conf on the dos partition of the SDCARD and uses that information to boot the linux kernel "zImage" with the linux kernel device tree blob "socfpga_cyclone5_socdk.dtb". The kernel and linux kernel device tree blob are also on the dos partion of the SDCARD.
+  * The linux kernel will mount the rootfs which is on the ext3 partition on the SDCARD
+
+## Linux Kernel
 
 Install the kernel sources on the build machine. For debian 12.5 this 6.1. An
 alternative is the repo https://github.com/altera-opensource/linux-socfpga
