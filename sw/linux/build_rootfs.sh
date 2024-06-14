@@ -9,7 +9,7 @@ sudo fakeroot debootstrap --foreign --arch=armhf bookworm ./rootfs
 sudo chroot ./rootfs /debootstrap/debootstrap --second-stage
 
 # Add some packages
-sudo chroot ./rootfs apt install -y sudo gpiod
+sudo chroot ./rootfs apt install -y sudo gpiod memtool
 
 # Create user caeuser
 sudo chroot ./rootfs useradd -m caeuser

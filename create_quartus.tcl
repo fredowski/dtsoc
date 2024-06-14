@@ -5,6 +5,7 @@ project_new -overwrite -family CYCLONEV -part 5CSEMA5F31C6 de1_soc_top
 set_global_assignment -name TOP_LEVEL_ENTITY de1_soc_top
 set_global_assignment -name QIP_FILE de1_soc/synthesis/de1_soc.qip
 set_global_assignment -name VHDL_FILE de1_soc_top.vhd
+set_global_assignment -name VHDL_FILE axireg.vhd
 
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name EDA_SIMULATION_TOOL "<None>"

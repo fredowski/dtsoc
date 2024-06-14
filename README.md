@@ -147,6 +147,20 @@ make sdcard
 
 to write the content to the sdcard. You need to format the sdcard before you can write to the sdcard as a special partition setup is required.
 
+## Enable the Lightweight HPS2FPGA Bus Bridge
+
+The Lightweight HPS2FPGA bridge is enabled during the u-boot bootloader process after u-boot has downloaded the de1_soc_top.rbf file to configure the fpga. The lw bridge is enabled in u-boot via the command:
+
+```
+bridge enable 0x2
+```
+
+This is done via the u-boot.scr which is compiled from [boot.script](sw/u-boot/boot.script). The bridge enable function will
+
+  * Disable the Reset for the lw bridge in the BRDMODRST register 0xFFD0501C
+  * Remap the address space 0xFF200000 via the L3REAMP register 0xFF800000
+  * "Maybe" enables the clocks?
+
 ## Test the system
 
 ### MSEL switches
@@ -164,7 +178,7 @@ Run
 ```
 gtkterm --port=/dev/ttyUSB0
 ```
-and switch on the board. You should see the following boot log:
+and switch on the board. You should see the boot log below
 
 ```
 U-Boot SPL 2023.10-31848-g0b3e82ca6e-dirty (Jun 08 2024 - 20:39:14 +0200)
@@ -699,3 +713,22 @@ sudo gpioset 1 24=1
 ```
 
 and the green "USER LED" in the lower right corner of the board should switch on.
+
+### Test the HPS2FPGA Bridge connectivity
+
+The u-boot loader should have configured the FPGA such that the HEX displays are on. The fpga part contains one axi peripheral which is attached to the lightweight HPS2FPGA AXI bridge. This bus is mapped to the address range 0xFF200000 to 0xFF3FFFFF. The VHDL code of the peripheral is in [axireg.vhd](axireg.vhd).
+
+The axi register is connected to the red leds on the board. The lower ten bits of the register will drive the red leds.
+
+The axi register does not check the address. Therefore all accesses to the LWHPS2FPGA address range will end up in this register. The reset value of the register is 0xAFFE1234. You can read the register content with "memtool". Read the register content with
+
+```
+sudo memtool md 0xff200000+4
+```
+
+Write to the register with
+
+```
+sudo memtool mw 0xff200000 0xabcd4321
+```
+You should see that writing to the register changes the red leds on the board.

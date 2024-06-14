@@ -2,3 +2,5 @@
 # Program FPGA
 fatload mmc 0:1 0x2000000 de1_soc_top.rbf
 fpga load 0 0x2000000 $filesize
+# Enable the LW HPS2FPGA Bridge
+bridge enable 0x2

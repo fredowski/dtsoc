@@ -73,7 +73,7 @@ port(
   KEY_N : in std_logic_vector(3 downto 0);
 
   -- LED
-  LEDR : out std_logic_vector(9 downto 0);
+  LEDR : out std_ulogic_vector(9 downto 0);
 
   -- PS2
   PS2_CLK  : inout std_logic;
@@ -280,62 +280,86 @@ architecture rtl of DE1_SoC_top is
 		);
 	end component de1_soc;
 
-
-  signal hps_0_h2f_lw_axi_master_awready : std_logic := '0';
-  signal hps_0_h2f_lw_axi_master_wready : std_logic := '0';
-  signal hps_0_h2f_lw_axi_master_bid : std_logic_vector(11 downto 0) := "000000000000";
-  signal hps_0_h2f_lw_axi_master_bresp : std_logic_vector(1 downto 0) := "00";
-  signal hps_0_h2f_lw_axi_master_bvalid : std_logic := '0';
-  signal h2f_lw_axi_master_arready : std_logic := '0';
-  signal hps_0_h2f_lw_axi_master_rdata : std_logic_vector(31 downto 0) := x"00000000";
-  signal hps_0_h2f_lw_axi_master_rid : std_logic_vector(11 downto 0) := "000000000000";
-  signal hps_0_h2f_lw_axi_master_rresp : std_logic_vector(1 downto 0) := "00";
-  signal hps_0_h2f_lw_axi_master_rlast : std_logic := '0';
-  signal hps_0_h2f_lw_axi_master_rvalid : std_logic := '0';
-  signal hps_reset_n : std_logic := '1';
+  signal h2f_lw_axi_awid    : std_logic_vector(11 downto 0);
+  signal h2f_lw_axi_awaddr  : std_logic_vector(20 downto 0);
+  signal h2f_lw_axi_awlen   : std_logic_vector(3 downto 0);
+  signal h2f_lw_axi_awsize  : std_logic_vector(2 downto 0);
+  signal h2f_lw_axi_awburst : std_logic_vector(1 downto 0);
+  signal h2f_lw_axi_awlock  : std_logic_vector(1 downto 0);
+  signal h2f_lw_axi_awcache : std_logic_vector(3 downto 0);
+  signal h2f_lw_axi_awprot  : std_logic_vector(2 downto 0);
+  signal h2f_lw_axi_awvalid : std_ulogic;
+  signal h2f_lw_axi_awready : std_ulogic;
+  signal h2f_lw_axi_wid     : std_logic_vector(11 downto 0);
+  signal h2f_lw_axi_wdata   : std_logic_vector(31 downto 0);
+  signal h2f_lw_axi_wstrb   : std_logic_vector(3 downto 0);
+  signal h2f_lw_axi_wlast   : std_ulogic;
+  signal h2f_lw_axi_wvalid  : std_ulogic;
+  signal h2f_lw_axi_wready  : std_ulogic;
+  signal h2f_lw_axi_bid     : std_ulogic_vector(11 downto 0);
+  signal h2f_lw_axi_bresp   : std_ulogic_vector(1 downto 0);
+  signal h2f_lw_axi_bvalid  : std_ulogic;
+  signal h2f_lw_axi_bready  : std_ulogic;
+  signal h2f_lw_axi_arid    : std_logic_vector(11 downto 0);
+  signal h2f_lw_axi_araddr  : std_logic_vector(20 downto 0);
+  signal h2f_lw_axi_arlen   : std_logic_vector(3 downto 0);
+  signal h2f_lw_axi_arsize  : std_logic_vector(2 downto 0);
+  signal h2f_lw_axi_arburst : std_logic_vector(1 downto 0);
+  signal h2f_lw_axi_arlock  : std_logic_vector(1 downto 0);
+  signal h2f_lw_axi_arcache : std_logic_vector(3 downto 0);
+  signal h2f_lw_axi_arprot  : std_logic_vector(2 downto 0);
+  signal h2f_lw_axi_arvalid : std_ulogic;
+  signal h2f_lw_axi_arready : std_ulogic;
+  signal h2f_lw_axi_rdata   : std_ulogic_vector(31 downto 0);
+  signal h2f_lw_axi_rid     : std_ulogic_vector(11 downto 0);
+  signal h2f_lw_axi_rresp   : std_ulogic_vector(1 downto 0);
+  signal h2f_lw_axi_rlast   : std_ulogic;
+  signal h2f_lw_axi_rvalid  : std_ulogic;
+  signal h2f_lw_axi_rready  : std_ulogic;
+  signal hps_reset_n        : std_ulogic;
 begin
 
   de1_soc_inst: de1_soc
    port map(
       clk_clk => CLOCK_50,
-      hps_0_h2f_lw_axi_clock_clk => CLOCK_50,
-      hps_0_h2f_lw_axi_master_awid => open,
-      hps_0_h2f_lw_axi_master_awaddr => open,
-      hps_0_h2f_lw_axi_master_awlen => open,
-      hps_0_h2f_lw_axi_master_awsize => open,
-      hps_0_h2f_lw_axi_master_awburst => open,
-      hps_0_h2f_lw_axi_master_awlock => open,
-      hps_0_h2f_lw_axi_master_awcache => open,
-      hps_0_h2f_lw_axi_master_awprot => open,
-      hps_0_h2f_lw_axi_master_awvalid => open,
-      hps_0_h2f_lw_axi_master_awready => hps_0_h2f_lw_axi_master_awready,
-      hps_0_h2f_lw_axi_master_wid => open,
-      hps_0_h2f_lw_axi_master_wdata => open,
-      hps_0_h2f_lw_axi_master_wstrb => open,
-      hps_0_h2f_lw_axi_master_wlast => open,
-      hps_0_h2f_lw_axi_master_wvalid => open,
-      hps_0_h2f_lw_axi_master_wready => hps_0_h2f_lw_axi_master_wready,
-      hps_0_h2f_lw_axi_master_bid => hps_0_h2f_lw_axi_master_bid,
-      hps_0_h2f_lw_axi_master_bresp => hps_0_h2f_lw_axi_master_bresp,
-      hps_0_h2f_lw_axi_master_bvalid => hps_0_h2f_lw_axi_master_bvalid,
-      hps_0_h2f_lw_axi_master_bready => open,
-      hps_0_h2f_lw_axi_master_arid => open,
-      hps_0_h2f_lw_axi_master_araddr => open,
-      hps_0_h2f_lw_axi_master_arlen => open,
-      hps_0_h2f_lw_axi_master_arsize => open,
-      hps_0_h2f_lw_axi_master_arburst => open,
-      hps_0_h2f_lw_axi_master_arlock => open,
-      hps_0_h2f_lw_axi_master_arcache => open,
-      hps_0_h2f_lw_axi_master_arprot => open,
-      hps_0_h2f_lw_axi_master_arvalid => open,
-      hps_0_h2f_lw_axi_master_arready => h2f_lw_axi_master_arready,
-      hps_0_h2f_lw_axi_master_rid => hps_0_h2f_lw_axi_master_rid,
-      hps_0_h2f_lw_axi_master_rdata => hps_0_h2f_lw_axi_master_rdata,
-      hps_0_h2f_lw_axi_master_rresp => hps_0_h2f_lw_axi_master_rresp,
-      hps_0_h2f_lw_axi_master_rlast => hps_0_h2f_lw_axi_master_rlast,
-      hps_0_h2f_lw_axi_master_rvalid => hps_0_h2f_lw_axi_master_rvalid,
-      hps_0_h2f_lw_axi_master_rready => open,
-      hps_0_h2f_reset_reset_n => open,
+      hps_0_h2f_lw_axi_clock_clk      => CLOCK_50,
+      hps_0_h2f_lw_axi_master_awid    => h2f_lw_axi_awid,
+      hps_0_h2f_lw_axi_master_awaddr  => h2f_lw_axi_awaddr,
+      hps_0_h2f_lw_axi_master_awlen   => h2f_lw_axi_awlen,
+      hps_0_h2f_lw_axi_master_awsize  => h2f_lw_axi_awsize,
+      hps_0_h2f_lw_axi_master_awburst => h2f_lw_axi_awburst,
+      hps_0_h2f_lw_axi_master_awlock  => h2f_lw_axi_awlock,
+      hps_0_h2f_lw_axi_master_awcache => h2f_lw_axi_awcache,
+      hps_0_h2f_lw_axi_master_awprot  => h2f_lw_axi_awprot,
+      hps_0_h2f_lw_axi_master_awvalid => h2f_lw_axi_awvalid,
+      hps_0_h2f_lw_axi_master_awready => h2f_lw_axi_awready,
+      hps_0_h2f_lw_axi_master_wid     => h2f_lw_axi_wid,
+      hps_0_h2f_lw_axi_master_wdata   => h2f_lw_axi_wdata,
+      hps_0_h2f_lw_axi_master_wstrb   => h2f_lw_axi_wstrb,
+      hps_0_h2f_lw_axi_master_wlast   => h2f_lw_axi_wlast,
+      hps_0_h2f_lw_axi_master_wvalid  => h2f_lw_axi_wvalid,
+      hps_0_h2f_lw_axi_master_wready  => h2f_lw_axi_wready,
+      hps_0_h2f_lw_axi_master_bid     => std_logic_vector(h2f_lw_axi_bid),
+      hps_0_h2f_lw_axi_master_bresp   => std_logic_vector(h2f_lw_axi_bresp),
+      hps_0_h2f_lw_axi_master_bvalid  => h2f_lw_axi_bvalid,
+      hps_0_h2f_lw_axi_master_bready  => h2f_lw_axi_bready,
+      hps_0_h2f_lw_axi_master_arid    => h2f_lw_axi_arid,
+      hps_0_h2f_lw_axi_master_araddr  => h2f_lw_axi_araddr,
+      hps_0_h2f_lw_axi_master_arlen   => h2f_lw_axi_arlen,
+      hps_0_h2f_lw_axi_master_arsize  => h2f_lw_axi_arsize,
+      hps_0_h2f_lw_axi_master_arburst => h2f_lw_axi_arburst,
+      hps_0_h2f_lw_axi_master_arlock  => h2f_lw_axi_arlock,
+      hps_0_h2f_lw_axi_master_arcache => h2f_lw_axi_arcache,
+      hps_0_h2f_lw_axi_master_arprot  => h2f_lw_axi_arprot,
+      hps_0_h2f_lw_axi_master_arvalid => h2f_lw_axi_arvalid,
+      hps_0_h2f_lw_axi_master_arready => h2f_lw_axi_arready,
+      hps_0_h2f_lw_axi_master_rid     => std_logic_vector(h2f_lw_axi_rid),
+      hps_0_h2f_lw_axi_master_rdata   => std_logic_vector(h2f_lw_axi_rdata),
+      hps_0_h2f_lw_axi_master_rresp   => std_logic_vector(h2f_lw_axi_rresp),
+      hps_0_h2f_lw_axi_master_rlast   => h2f_lw_axi_rlast,
+      hps_0_h2f_lw_axi_master_rvalid  => h2f_lw_axi_rvalid,
+      hps_0_h2f_lw_axi_master_rready  => h2f_lw_axi_rready,
+      hps_0_h2f_reset_reset_n         => hps_reset_n,
       hps_ddr3_mem_a => HPS_DDR3_ADDR,
       hps_ddr3_mem_ba => HPS_DDR3_BA,
       hps_ddr3_mem_ck => HPS_DDR3_CK_P,
@@ -410,7 +434,47 @@ begin
       reset_reset_n => hps_reset_n
   );
 
-  LEDR <= SW;
-
+  axireg_inst: entity work.axireg
+   port map(
+      clk => CLOCK_50,
+      rst_n => hps_reset_n,
+      axi_slave_awid    => std_ulogic_vector(h2f_lw_axi_awid),
+      axi_slave_awaddr  => std_ulogic_vector(h2f_lw_axi_awaddr),
+      axi_slave_awlen   => std_ulogic_vector(h2f_lw_axi_awlen),
+      axi_slave_awsize  => std_ulogic_vector(h2f_lw_axi_awsize),
+      axi_slave_awburst => std_ulogic_vector(h2f_lw_axi_awburst),
+      axi_slave_awlock  => std_ulogic_vector(h2f_lw_axi_awlock),
+      axi_slave_awcache => std_ulogic_vector(h2f_lw_axi_awcache),
+      axi_slave_awprot  => std_ulogic_vector(h2f_lw_axi_awprot),
+      axi_slave_awvalid => h2f_lw_axi_awvalid,
+      axi_slave_awready => h2f_lw_axi_awready,
+      axi_slave_wid     => std_ulogic_vector(h2f_lw_axi_wid),
+      axi_slave_wdata   => std_ulogic_vector(h2f_lw_axi_wdata),
+      axi_slave_wstrb   => std_ulogic_vector(h2f_lw_axi_wstrb),
+      axi_slave_wlast   => h2f_lw_axi_wlast,
+      axi_slave_wvalid  => h2f_lw_axi_wvalid,
+      axi_slave_wready  => h2f_lw_axi_wready,
+      axi_slave_bid     => h2f_lw_axi_bid,
+      axi_slave_bresp   => h2f_lw_axi_bresp,
+      axi_slave_bvalid  => h2f_lw_axi_bvalid,
+      axi_slave_bready  => h2f_lw_axi_bready,
+      axi_slave_arid    => std_ulogic_vector(h2f_lw_axi_arid),
+      axi_slave_araddr  => std_ulogic_vector(h2f_lw_axi_araddr),
+      axi_slave_arlen   => std_ulogic_vector(h2f_lw_axi_arlen),
+      axi_slave_arsize  => std_ulogic_vector(h2f_lw_axi_arsize),
+      axi_slave_arburst => std_ulogic_vector(h2f_lw_axi_arburst),
+      axi_slave_arlock  => std_ulogic_vector(h2f_lw_axi_arlock),
+      axi_slave_arcache => std_ulogic_vector(h2f_lw_axi_arcache),
+      axi_slave_arprot  => std_ulogic_vector(h2f_lw_axi_arprot),
+      axi_slave_arvalid => h2f_lw_axi_arvalid,
+      axi_slave_arready => h2f_lw_axi_arready,
+      axi_slave_rid     => h2f_lw_axi_rid,
+      axi_slave_rdata   => h2f_lw_axi_rdata,
+      axi_slave_rresp   => h2f_lw_axi_rresp,
+      axi_slave_rlast   => h2f_lw_axi_rlast,
+      axi_slave_rvalid  => h2f_lw_axi_rvalid,
+      axi_slave_rready  => h2f_lw_axi_rready,
+      led_o             => LEDR
+  );
 
 end;
