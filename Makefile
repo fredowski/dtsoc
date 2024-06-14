@@ -16,7 +16,7 @@ de1_soc/synthesis/de1_soc.qip: de1_soc.qsys
 .PHONY: qpf
 qpf: de1_soc_top.qpf
 
-de1_soc_top.qpf: de1_soc/synthesis/de1_soc.qip
+de1_soc_top.qpf: de1_soc/synthesis/de1_soc.qip create_quartus.tcl
 	quartus_sh --script=create_quartus.tcl || rm de1_soc_top.qpf
 
 output_files/de1_soc_top.map.summary: de1_soc_top.qpf
